@@ -8,7 +8,7 @@ It's pretty dumb at the moment, it will not translate multiline (`/* */`) commen
 
 1. `sudo pip install microsofttranslator`
 
-2. Get your `Client ID` and `Client Secret` from Microsoft, read instructions at [microsofttranslator's lib page](https://github.com/openlabs/Microsoft-Translator-Python-API)
+2. Get your `Client ID` and `Client Secret` from Microsoft, read instructions at [microsofttranslator's lib page](https://github.com/openlabs/Microsoft-Translator-Python-API#registering-your-application)
 
 ### (Optional) Configure
 
