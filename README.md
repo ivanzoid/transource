@@ -2,7 +2,7 @@ Utility to automatically convert C++-style comments in source code from any lang
 
 ### Limitations
 
-It's pretty dumb at the moment, it will not translate multiline (`/* */`) comments, and it will not try to translate consecutive comments as a single whole.
+It's pretty dumb at the moment, it will not translate multiline (`/* */`) comments, and it will translate consecutive comments line by line, not as a single whole.
 
 ### Prerequisites
 
