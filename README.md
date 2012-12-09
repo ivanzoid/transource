@@ -34,7 +34,7 @@ Or if not, pass your secret values as command-line options:
 
 ### Mass-processing
 
-For mass-translating lots of files I use this (make sure you have backups of your files before running, of course):
+For mass-translating of lots of files I use this (make sure you have backups of your files before running, of course):
 
 `find . -name '*.[hc]' -exec sh -c 'transource {} > {}.tmp && mv {}.tmp {}' \;`
 
