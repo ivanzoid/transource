@@ -1,0 +1,126 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+from __future__ import print_function
+from microsofttranslator import Translator
+import sys
+import os
+import re
+import json
+import getopt
+import codecs
+import unicodedata
+
+#
+# Utils
+#
+
+LatinLetters={}
+
+def isLatin(uchr):
+	try:
+		return LatinLetters[uchr]
+	except KeyError:
+		return LatinLetters.setdefault(uchr, 'LATIN' in unicodedata.name(uchr))
+
+def only_roman_chars(unistr):
+	return all(isLatin(uchr)
+		for uchr in unistr
+			if uchr.isalpha())
+
+def usage():
+	text = """Usage: %s [options] <filename>
+Options are:
+    [-c|--cid|--clientId <clientId>]
+    [-s|--secret|--clientSecret <clientSecret>]
+""" % os.path.basename(__file__)
+	sys.stderr.write(text)
+
+#
+# Translation routines
+#
+
+Translator=None
+CommentRegexp=None
+
+def writeLine(line):
+	sys.stdout.write(line.encode('utf-8'))
+
+def translateLine(file, line, lineno):
+	searchResult = CommentRegexp.search(line)
+	comments = []
+	if searchResult != None:
+		comments = searchResult.groups()
+	if len(comments) < 2:
+		return None
+	else:
+		if only_roman_chars(line):
+			return None
+		else:
+			preComment = comments[0]
+			comment = comments[1]
+			sys.stderr.write('%s:%d: translating... ' % (file.name, lineno))
+			translatedComment = Translator.translate(comment, "en")
+			sys.stderr.write('done\n')
+			if not translatedComment[:1] == ' ':
+				translatedComment = ' ' + translatedComment
+			outLine = '%s//%s' % (preComment, translatedComment)
+			if not outLine[1:] == '\n':
+				outLine = outLine + '\n'
+			return outLine
+
+def translateFile(file):
+	i = 1
+	for line in file:
+		resultLine = translateLine(file, line, i)
+		if resultLine != None:
+			writeOutputLine(resultLine)
+		else:
+			writeOutputLine(line)
+		i = i + 1
+
+
+def main():
+	# Parse options
+	filename = None
+	clientId = None
+	clientSecret = None
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "hc:s:", ["help", "cid=", "clientId=", "secret=", "clientSecret="])
+		if len(opts) == 0:
+			usage()
+			sys.exit(1)
+		for option, value in opts:
+			if option == "-h" or option == "--help":
+				usage()
+				sys.exit()
+			elif option == "-c" or option == "--cid" or option == "--clientId":
+				clientId = value
+			elif option == "-s" or option == "--secret" or option == "--clientSecret":
+				clientSecret = value
+		if len(opts) > 1:
+			sys.stderr.write('Too much filenames given.\n')
+			sys.exit(1)
+		filename = args[0]
+	except getopt.GetoptError as err:
+		print(err)
+		usage()
+		sys.exit(1)
+
+	# Read config file if needed
+	if clientId == None or clientSecret == None:
+		with open(os.path.expanduser('~/.transource.cfg')) as cfgfile:    
+			data = json.load(cfgfile)
+			if clientId == None and 'clientId' in data:
+				clientId = data['clientId']
+			if clientSecret == None and 'clientSecret' in data:
+				clientSecret = data['clientSecret']
+
+	# Do translate
+	with codecs.open(filename, encoding='utf-8') as file:
+		Translator = Translator(clientId, clientSecret)
+		CommentRegexp = re.compile(r'(.*)//(.*)')
+		translateFile(filename, file)
+
+if __name__ == "__main__":
+	main()
