@@ -109,19 +109,38 @@ def main():
 
 	# Read config file if needed
 	if clientId == None or clientSecret == None:
-		with open(os.path.expanduser('~/.transource.cfg')) as cfgfile:    
-			data = json.load(cfgfile)
-			if clientId == None and 'clientId' in data:
-				clientId = data['clientId']
-			if clientSecret == None and 'clientSecret' in data:
-				clientSecret = data['clientSecret']
+		try:
+			with open(os.path.expanduser('~/.transource.cfg')) as cfgfile:    
+				data = json.load(cfgfile)
+				if clientId == None and 'clientId' in data:
+					clientId = data['clientId']
+				if clientSecret == None and 'clientSecret' in data:
+					clientSecret = data['clientSecret']
+		except Exception:
+			pass
+
+	if clientId == None:
+		sys.stderr.write("Error: please specify your Client ID.\n")
+		sys.exit(1)
+
+	if clientSecret == None:
+		sys.stderr.write("Error: please specify your Client Secret.\n")
+		sys.exit(1)
+
+	# Open file
+	srcfile = None
+	try:
+		srcfile = codecs.open(filename, encoding='utf-8')
+	except Exception as e:
+		print(str(e))
+		sys.exit(1)
 
 	# Do translate
-	with codecs.open(filename, encoding='utf-8') as srcfile:
-		global Translator, CommentRegexp
-		Translator = microsofttranslator.Translator(clientId, clientSecret)
-		CommentRegexp = re.compile(r'(.*)//(.*)')
-		translateFile(srcfile)
+	global Translator, CommentRegexp
+	Translator = microsofttranslator.Translator(clientId, clientSecret)
+	CommentRegexp = re.compile(r'(.*)//(.*)')
+	translateFile(srcfile)
+	srcfile.close()
 
 if __name__ == "__main__":
 	main()
