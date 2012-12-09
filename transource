@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 from __future__ import print_function
-from microsofttranslator import Translator
+import microsofttranslator
 import sys
 import os
 import re
@@ -74,9 +74,9 @@ def translateFile(file):
 	for line in file:
 		resultLine = translateLine(file, line, i)
 		if resultLine != None:
-			writeOutputLine(resultLine)
+			writeLine(resultLine)
 		else:
-			writeOutputLine(line)
+			writeLine(line)
 		i = i + 1
 
 
@@ -87,9 +87,6 @@ def main():
 	clientSecret = None
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "hc:s:", ["help", "cid=", "clientId=", "secret=", "clientSecret="])
-		if len(opts) == 0:
-			usage()
-			sys.exit(1)
 		for option, value in opts:
 			if option == "-h" or option == "--help":
 				usage()
@@ -98,7 +95,10 @@ def main():
 				clientId = value
 			elif option == "-s" or option == "--secret" or option == "--clientSecret":
 				clientSecret = value
-		if len(opts) > 1:
+		if len(args) == 0:
+			usage()
+			sys.exit(1)
+		if len(args) > 1:
 			sys.stderr.write('Too much filenames given.\n')
 			sys.exit(1)
 		filename = args[0]
@@ -118,9 +118,10 @@ def main():
 
 	# Do translate
 	with codecs.open(filename, encoding='utf-8') as file:
-		Translator = Translator(clientId, clientSecret)
+		global Translator, CommentRegexp
+		Translator = microsofttranslator.Translator(clientId, clientSecret)
 		CommentRegexp = re.compile(r'(.*)//(.*)')
-		translateFile(filename, file)
+		translateFile(file)
 
 if __name__ == "__main__":
 	main()
