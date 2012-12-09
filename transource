@@ -23,7 +23,7 @@ def isLatin(uchr):
 	except KeyError:
 		return LatinLetters.setdefault(uchr, 'LATIN' in unicodedata.name(uchr))
 
-def only_roman_chars(unistr):
+def onlyRomanChars(unistr):
 	return all(isLatin(uchr)
 		for uchr in unistr
 			if uchr.isalpha())
@@ -46,7 +46,7 @@ CommentRegexp=None
 def writeLine(line):
 	sys.stdout.write(line.encode('utf-8'))
 
-def translateLine(file, line, lineno):
+def translateLine(srcfile, line, lineno):
 	searchResult = CommentRegexp.search(line)
 	comments = []
 	if searchResult != None:
@@ -54,12 +54,12 @@ def translateLine(file, line, lineno):
 	if len(comments) < 2:
 		return None
 	else:
-		if only_roman_chars(line):
+		if onlyRomanChars(line):
 			return None
 		else:
 			preComment = comments[0]
 			comment = comments[1]
-			sys.stderr.write('%s:%d: translating... ' % (file.name, lineno))
+			sys.stderr.write('%s:%d: translating... ' % (srcfile.name, lineno))
 			translatedComment = Translator.translate(comment, "en")
 			sys.stderr.write('done\n')
 			if not translatedComment[:1] == ' ':
@@ -69,10 +69,10 @@ def translateLine(file, line, lineno):
 				outLine = outLine + '\n'
 			return outLine
 
-def translateFile(file):
+def translateFile(srcfile):
 	i = 1
-	for line in file:
-		resultLine = translateLine(file, line, i)
+	for line in srcfile:
+		resultLine = translateLine(srcfile, line, i)
 		if resultLine != None:
 			writeLine(resultLine)
 		else:
@@ -117,11 +117,11 @@ def main():
 				clientSecret = data['clientSecret']
 
 	# Do translate
-	with codecs.open(filename, encoding='utf-8') as file:
+	with codecs.open(filename, encoding='utf-8') as srcfile:
 		global Translator, CommentRegexp
 		Translator = microsofttranslator.Translator(clientId, clientSecret)
 		CommentRegexp = re.compile(r'(.*)//(.*)')
-		translateFile(file)
+		translateFile(srcfile)
 
 if __name__ == "__main__":
 	main()
