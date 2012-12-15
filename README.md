@@ -12,7 +12,7 @@ It's pretty dumb at the moment, it will not translate multiline (`/* */`) commen
 
 ### (Optional) Configure
 
-Create `~/.transource.cfg` with contents like this (it's in JSON formt):
+Create `~/.transource.cfg` with contents like this (it's in JSON format):
 
 ```
 {
