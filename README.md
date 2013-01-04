@@ -1,4 +1,4 @@
-Utility to automatically convert C++-style comments in source code from any language to English.
+Utility to automatically convert C++-style comments (`//`) in source code from any language to English.
 
 ### Limitations
 
